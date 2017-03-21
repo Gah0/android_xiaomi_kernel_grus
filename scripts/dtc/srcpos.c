@@ -268,7 +268,7 @@ srcpos_string(struct srcpos *pos)
 	char *pos_str;
 	int rc;
 
-	if (pos)
+	if (pos->file && pos->file->name)
 		fname = pos->file->name;
 
 
