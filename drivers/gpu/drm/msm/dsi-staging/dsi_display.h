@@ -675,4 +675,8 @@ int dsi_display_get_panel_vfp(void *display,
 
 struct dsi_display *get_primary_display(void);
 
+#ifdef CONFIG_EXPOSURE_ADJUSTMENT
+struct dsi_display *get_main_display(void);
+#endif
+
 #endif /* _DSI_DISPLAY_H_ */
