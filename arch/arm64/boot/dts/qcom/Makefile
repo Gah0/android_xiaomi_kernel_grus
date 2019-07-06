@@ -1,3 +1,9 @@
+ifneq ($(CONFIG_MACH_XIAOMI),y)
+dtb-$(CONFIG_ARCH_QCOM)	+= apq8016-sbc.dtb msm8916-mtp.dtb
+dtb-$(CONFIG_ARCH_QCOM)	+= msm8996-mtp.dtb
+dtb-$(CONFIG_ARCH_QCOM)	+= apq8096-db820c.dtb
+endif
+
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 	dtbo-$(CONFIG_ARCH_SDM845) += \
 		sdm845-cdp-overlay.dtbo \
@@ -112,6 +118,15 @@ dtb-$(CONFIG_ARCH_SDM845) += sdm845-sim.dtb \
 endif
 
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
+ifeq ($(CONFIG_MACH_XIAOMI_SDM710),y)
+	dtbo-$(CONFIG_MACH_XIAOMI_F2) += \
+		grus-sdm710-overlay.dtbo \
+		grus-sdm712-overlay.dtbo
+
+grus-sdm710-overlay.dtbo-base := sdm710.dtb
+grus-sdm712-overlay.dtbo-base := sdm710.dtb
+
+else
 	dtbo-$(CONFIG_ARCH_SDM670) += \
 		sdm670-mtp-overlay.dtbo \
 		sdm670-rumi-overlay.dtbo \
@@ -151,9 +166,11 @@ ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 		sdm710-tasha-codec-cdp-overlay.dtbo \
 		sdm710-pm660a-tasha-codec-cdp-overlay.dtbo \
 		sdm710-aqt1000-cdp-overlay.dtbo \
-		sdm710-pm660a-aqt1000-cdp-overlay.dtbo \
-		grus-sdm710-overlay.dtbo \
-		grus-sdm712-overlay.dtbo
+		sxr1130-usbc-external-codec-cdp-overlay.dtbo \
+		sxr1130-usbc-external-codec-mtp-overlay.dtbo \
+		sxr1130-usbc-external-codec-pm660a-mtp-overlay.dtbo \
+		sxr1130-usbc-mtp-overlay.dtbo \
+		sxr1130-usbc-pm660a-mtp-overlay.dtbo
 
 sdm670-cdp-overlay.dtbo-base := sdm670.dtb
 sdm670-mtp-overlay.dtbo-base := sdm670.dtb
@@ -202,8 +219,13 @@ sxr1130-usbc-external-codec-mtp-overlay.dtbo-base := sxr1130.dtb
 sxr1130-usbc-external-codec-pm660a-mtp-overlay.dtbo-base := sxr1130.dtb
 sxr1130-usbc-mtp-overlay.dtbo-base := sxr1130.dtb
 sxr1130-usbc-pm660a-mtp-overlay.dtbo-base := sxr1130.dtb
-grus-sdm710-overlay.dtbo-base := sdm710.dtb
-grus-sdm712-overlay.dtbo-base := sdm710.dtb
+endif
+
+else
+ifeq ($(CONFIG_MACH_XIAOMI_SDM710),y)
+dtb-$(CONFIG_MACH_XIAOMI_F2) += \
+	grus-sdm710.dtb \
+	grus-sdm712.dtb
 
 else
 dtb-$(CONFIG_ARCH_SDM670) += sdm670-rumi.dtb \
@@ -242,8 +264,12 @@ dtb-$(CONFIG_ARCH_SDM670) += sdm670-rumi.dtb \
 	sdm710-usbc-pm660a-mtp.dtb \
 	sdm710-tasha-codec-cdp.dtb \
 	sdm710-pm660a-tasha-codec-cdp.dtb \
-	grus-sdm710.dtb \
-	grus-sdm712.dtb 
+	sxr1130-usbc-external-codec-cdp.dtb \
+	sxr1130-usbc-external-codec-mtp.dtb \
+	sxr1130-usbc-external-codec-pm660a-mtp.dtb \
+	sxr1130-usbc-mtp.dtb \
+	sxr1130-usbc-pm660a-mtp.dtb
+endif
 endif
 
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
