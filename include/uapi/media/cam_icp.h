@@ -62,7 +62,7 @@
 /* Command meta types */
 #define CAM_ICP_CMD_META_GENERIC_BLOB           0x1
 
-/* Generic blob types */
+/* Generic blon types */
 #define CAM_ICP_CMD_GENERIC_BLOB_CLK            0x1
 #define CAM_ICP_CMD_GENERIC_BLOB_CFG_IO         0x2
 #define CAM_ICP_CMD_GENERIC_BLOB_FW_MEM_MAP     0x3

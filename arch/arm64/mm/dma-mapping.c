@@ -2,6 +2,7 @@
  * SWIOTLB-based DMA API implementation
  *
  * Copyright (C) 2012 ARM Ltd.
+ * Copyright (C) 2019 XiaoMi, Inc.
  * Author: Catalin Marinas <catalin.marinas@arm.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1254,7 +1255,7 @@ static struct page **__iommu_alloc_buffer(struct device *dev, size_t size,
 	struct page **pages;
 	size_t count = size >> PAGE_SHIFT;
 	size_t array_size = count * sizeof(struct page *);
-	int i = 0;
+	int i = 0, order;
 	bool is_coherent = is_dma_coherent(dev, attrs);
 	struct dma_iommu_mapping *mapping = dev->archdata.mapping;
 	unsigned int alloc_sizes = mapping->domain->pgsize_bitmap;
@@ -1292,21 +1293,15 @@ static struct page **__iommu_alloc_buffer(struct device *dev, size_t size,
 	if (!order_mask)
 		goto error;
 
+	order = __fls(count);
 	while (count) {
-		int j, order;
 
-		order_mask &= (2U << __fls(count)) - 1;
-		order = __fls(order_mask);
-
-		pages[i] = alloc_pages(order ? (gfp | __GFP_NORETRY) &
-					~__GFP_RECLAIM : gfp, order);
-		while (!pages[i] && order) {
-			order_mask &= ~(1U << order);
-			order = __fls(order_mask);
-			pages[i] = alloc_pages(order ? (gfp | __GFP_NORETRY) &
-					~__GFP_RECLAIM : gfp, order);
-		}
-
+		int j, order_tmp = __fls(count);
+		if (order > order_tmp)
+			order = order_tmp;
+		pages[i] = alloc_pages(gfp, order);
+		while (!pages[i] && order)
+			pages[i] = alloc_pages(gfp, --order);
 		if (!pages[i])
 			goto error;
 
