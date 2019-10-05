@@ -51,6 +51,7 @@
 #include <wlan_hdd_tsf.h>
 #include <net/tcp.h>
 #include "wma_api.h"
+#include "../../sme/inc/sme_power_save_api.h"
 
 #ifdef QCA_LL_TX_FLOW_CONTROL_V2
 /*
