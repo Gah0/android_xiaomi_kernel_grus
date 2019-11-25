@@ -457,6 +457,9 @@ static int smb2_parse_dt(struct smb2 *chip)
 		chip->dt.jeita_cool_cc_delta = JEITA_SOFT_COOL_CC_COMP;
 	chg->jeita_ccomp_cool_delta = chip->dt.jeita_cool_cc_delta;
 
+	chg->ufp_only_mode = of_property_read_bool(node,
+					"qcom,ufp-only-mode");
+
 	return 0;
 }
 
@@ -2126,6 +2129,7 @@ static int smb2_post_init(struct smb2 *chip)
 {
 	struct smb_charger *chg = &chip->chg;
 	int rc;
+	u8 stat;
 
 	/* In case the usb path is suspended, we would have missed disabling
 	 * the icl change interrupt because the interrupt could have been
@@ -2133,13 +2137,36 @@ static int smb2_post_init(struct smb2 *chip)
 	 */
 	rerun_election(chg->usb_icl_votable);
 
-	/* configure power role for dual-role */
-	rc = smblib_masked_write(chg, TYPE_C_INTRPT_ENB_SOFTWARE_CTRL_REG,
-				 TYPEC_POWER_ROLE_CMD_MASK, 0);
-	if (rc < 0) {
-		dev_err(chg->dev,
-			"Couldn't configure power role for DRP rc=%d\n", rc);
-		return rc;
+	/* Force charger in Sink Only mode */
+	if (chg->ufp_only_mode) {
+		rc = smblib_read(chg, TYPE_C_INTRPT_ENB_SOFTWARE_CTRL_REG,
+				&stat);
+		if (rc < 0) {
+			dev_err(chg->dev,
+				"Couldn't read SOFTWARE_CTRL_REG rc=%d\n", rc);
+			return rc;
+		}
+
+		if (!(stat & UFP_EN_CMD_BIT)) {
+			/* configure charger in UFP only mode */
+			rc  = smblib_force_ufp(chg);
+			if (rc < 0) {
+				dev_err(chg->dev,
+					"Couldn't force UFP mode rc=%d\n", rc);
+				return rc;
+			}
+		}
+	} else {
+		/* configure power role for dual-role */
+		rc = smblib_masked_write(chg,
+					TYPE_C_INTRPT_ENB_SOFTWARE_CTRL_REG,
+					TYPEC_POWER_ROLE_CMD_MASK, 0);
+		if (rc < 0) {
+			dev_err(chg->dev,
+				"Couldn't configure power role for DRP rc=%d\n",
+				rc);
+			return rc;
+		}
 	}
 
 	rerun_election(chg->usb_irq_enable_votable);
@@ -2807,8 +2834,9 @@ static void smb2_shutdown(struct platform_device *pdev)
 	/* disable all interrupts */
 	smb2_disable_interrupts(chg);
 
-	/* configure power role for UFP */
-	smblib_masked_write(chg, TYPE_C_INTRPT_ENB_SOFTWARE_CTRL_REG,
+	if (!chg->ufp_only_mode)
+		/* configure power role for UFP */
+		smblib_masked_write(chg, TYPE_C_INTRPT_ENB_SOFTWARE_CTRL_REG,
 				TYPEC_POWER_ROLE_CMD_MASK, UFP_EN_CMD_BIT);
 
 	/* force HVDCP to 5V */
