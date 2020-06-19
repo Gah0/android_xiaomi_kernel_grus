@@ -123,8 +123,8 @@ ifeq ($(CONFIG_MACH_XIAOMI_SDM710),y)
 		grus-sdm710-overlay.dtbo \
 		grus-sdm712-overlay.dtbo
 
-grus-sdm710-overlay.dtbo-base := sdm710.dtb
-grus-sdm712-overlay.dtbo-base := sdm710.dtb
+grus-sdm710-overlay.dtbo-base := 20.6.4_grus.dtb
+grus-sdm712-overlay.dtbo-base := 20.6.4_grus.dtb
 
 else
 	dtbo-$(CONFIG_ARCH_SDM670) += \
