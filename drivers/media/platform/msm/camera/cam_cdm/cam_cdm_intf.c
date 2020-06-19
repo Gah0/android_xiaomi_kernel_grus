@@ -562,7 +562,6 @@ static struct platform_driver cam_cdm_intf_driver = {
 	.name = "msm_cam_cdm_intf",
 	.owner = THIS_MODULE,
 	.of_match_table = msm_cam_cdm_intf_dt_match,
-	.suppress_bind_attrs = true,
 	},
 };
 

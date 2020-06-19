@@ -19,6 +19,7 @@
 #include "cam_hw_mgr_intf.h"
 #include "cam_req_mgr_interface.h"
 
+#define CAM_NODE_NAME_LENGTH_MAX        256
 
 #define CAM_NODE_STATE_UNINIT           0
 #define CAM_NODE_STATE_INIT             1
@@ -39,7 +40,7 @@
  *
  */
 struct cam_node {
-	char                         name[CAM_CTX_DEV_NAME_MAX_LENGTH];
+	char                         name[CAM_NODE_NAME_LENGTH_MAX];
 	uint32_t                     state;
 
 	/* context pool */
