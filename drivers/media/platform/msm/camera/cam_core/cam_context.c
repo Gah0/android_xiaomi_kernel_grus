@@ -1,4 +1,5 @@
-/* Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2020 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -163,6 +164,7 @@ int cam_context_handle_crm_apply_req(struct cam_context *ctx,
 		return -EINVAL;
 	}
 
+	mutex_lock(&ctx->ctx_mutex);
 	if (ctx->state_machine[ctx->state].crm_ops.apply_req) {
 		rc = ctx->state_machine[ctx->state].crm_ops.apply_req(ctx,
 			apply);
@@ -171,6 +173,7 @@ int cam_context_handle_crm_apply_req(struct cam_context *ctx,
 			ctx->dev_hdl, ctx->state);
 		rc = -EPROTO;
 	}
+	mutex_unlock(&ctx->ctx_mutex);
 
 	return rc;
 }
@@ -460,6 +463,7 @@ int cam_context_init(struct cam_context *ctx,
 	ctx->ctx_crm_intf = NULL;
 	ctx->crm_ctx_intf = crm_node_intf;
 	ctx->hw_mgr_intf = hw_mgr_intf;
+	ctx->ctx_released = true;
 	ctx->irq_cb_intf = cam_context_handle_hw_event;
 
 	INIT_LIST_HEAD(&ctx->active_req_list);
@@ -500,7 +504,12 @@ int cam_context_deinit(struct cam_context *ctx)
 
 void cam_context_putref(struct cam_context *ctx)
 {
-	kref_put(&ctx->refcount, cam_node_put_ctxt_to_free_list);
+	if (atomic_read(&(ctx->refcount.refcount)))
+		kref_put(&ctx->refcount, cam_node_put_ctxt_to_free_list);
+	else
+		WARN(1, "ctx %s %d state %d devhdl %X\n", ctx->dev_name,
+			ctx->ctx_id, ctx->state, ctx->dev_hdl);
+
 	CAM_DBG(CAM_CORE,
 		"ctx device hdl %ld, ref count %d, dev_name %s",
 		ctx->dev_hdl, atomic_read(&(ctx->refcount.refcount)),

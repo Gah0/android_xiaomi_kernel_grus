@@ -1,4 +1,5 @@
 /* Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2020 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -14,10 +15,13 @@
 #include "cam_req_mgr_dev.h"
 #include "cam_cci_soc.h"
 #include "cam_cci_core.h"
+#include <soc/qcom/socinfo.h>
 
 #define CCI_MAX_DELAY 1000000
 
 static struct v4l2_subdev *g_cci_subdev;
+
+uint32_t hw_version_platform;
 
 struct v4l2_subdev *cam_cci_get_subdev(void)
 {
@@ -414,6 +418,8 @@ static int cam_cci_assign_fops(void)
 		return -EINVAL;
 	}
 	sd->devnode->fops = &cci_v4l2_subdev_fops;
+
+	hw_version_platform = get_hw_version_platform();
 
 	return 0;
 }
