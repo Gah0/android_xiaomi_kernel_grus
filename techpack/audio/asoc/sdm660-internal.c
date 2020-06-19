@@ -3741,23 +3741,12 @@ static struct snd_soc_card *msm_int_populate_sndcard_dailinks(
 			msm_mi2s_be_dai_links[4].codec_name = "tas2557.2-004c";
 			msm_mi2s_be_dai_links[4].codec_dai_name = "tas2557 ASI1";
 		} else */
-		if (HARDWARE_PLATFORM_SIRIUS == hw_platform) {
-			dev_info(dev, "%s: hardware is HARDWARE_PLATFORM_SIRIUS.\n", __func__);
-			msm_mi2s_be_dai_links[0].codec_name = "tas2557.2-004c";
-			msm_mi2s_be_dai_links[0].codec_dai_name = "tas2557 ASI1";
-		} else if (HARDWARE_PLATFORM_GRUS == hw_platform) {
+		if (HARDWARE_PLATFORM_GRUS == hw_platform) {
 			dev_info(dev, "%s: hardware is HARDWARE_PLATFORM_GRUS.\n", __func__);
 #ifdef CONFIG_SND_SOC_CS35L41_FOR_GRUS
 			msm_mi2s_be_dai_links[0].codec_name = CS35L41_CODEC_NAME;
 			msm_mi2s_be_dai_links[0].codec_dai_name = "cs35l41-pcm";
 #endif
-		} else if (HARDWARE_PLATFORM_PYXIS == hw_platform ||
-				HARDWARE_PLATFORM_VELA == hw_platform) {
-			dev_info(dev, "%s: hardware is HARDWARE_PLATFORM_PYXIS or BAMBOO or COSMOS.\n", __func__);
-			msm_mi2s_be_dai_links[0].codec_name = "tas2562.2-004c";
-			msm_mi2s_be_dai_links[0].codec_dai_name = "tas2562 ASI1";
-			msm_mi2s_be_dai_links[1].codec_name = "tas2562.2-004c";
-			msm_mi2s_be_dai_links[1].codec_dai_name = "tas2562 ASI1";
 		} else {
 			dev_info(dev, "%s: hardware is unknown, %d.\n", __func__, hw_platform);
 			msm_mi2s_be_dai_links[0].codec_name = "tas2557.2-004c";
