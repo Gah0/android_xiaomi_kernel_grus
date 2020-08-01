@@ -32,11 +32,9 @@
 #define WCN_CDC_SLIM_RX_CH_MAX 2
 #define WCN_CDC_SLIM_TX_CH_MAX 3
 
-#ifdef CONFIG_SND_SOC_CS35L41_FOR_GRUS
 #define CS35L41_CODEC_NAME "cs35l41.2-0040"
 #if 0
 static atomic_t cs35l41_mclk_rsc_ref;
-#endif
 #endif
 
 #define WSA8810_NAME_1 "wsa881x.20170211"
@@ -1874,11 +1872,9 @@ static int msm_snd_card_late_probe(struct snd_soc_card *card)
 	struct snd_soc_codec *ana_cdc;
 	struct snd_soc_pcm_runtime *rtd;
 	int ret = 0;
-#ifdef CONFIG_SND_SOC_CS35L41_FOR_GRUS
 	struct snd_soc_dai_link *dai_link;
 	struct snd_soc_codec *cs35l41_codec;
 	struct snd_soc_dapm_context * cs35l41_dapm;
-#endif
 
 	rtd = snd_soc_get_pcm_runtime(card, be_dl_name);
 	if (!rtd) {
@@ -1899,7 +1895,6 @@ static int msm_snd_card_late_probe(struct snd_soc_card *card)
 			"%s: msm_anlg_cdc_hs_detect failed\n", __func__);
 		kfree(mbhc_cfg_ptr->calibration);
 	}
-#ifdef CONFIG_SND_SOC_CS35L41_FOR_GRUS
 #if 0
 	atomic_set(&cs35l41_mclk_rsc_ref, 0);
 	dev_info(card->dev, "%s: set cs35l41_mclk_rsc_ref to 0 \n", __func__);
@@ -1922,7 +1917,6 @@ static int msm_snd_card_late_probe(struct snd_soc_card *card)
 			snd_soc_dapm_sync(cs35l41_dapm);
 		}
 	}
-#endif
 
 	return ret;
 }
@@ -1942,7 +1936,6 @@ static struct snd_soc_ops msm_mi2s_be_ops = {
 	.shutdown = msm_mi2s_snd_shutdown,
 };
 
-#ifdef CONFIG_SND_SOC_CS35L41_FOR_GRUS
 #if 0
 static int msm_hw_params_cs35l41_fixup(struct snd_soc_pcm_runtime *rtd,
                                 struct snd_pcm_hw_params *params)
@@ -2027,7 +2020,6 @@ static struct snd_soc_ops msm_mi2s_cs35l41_be_ops = {
         .startup = msm_mi2s_cs35l41_startup,
         .shutdown = msm_mi2s_cs35l41_shutdown,
 };
-#endif
 #endif
 
 static struct snd_soc_ops msm_aux_pcm_be_ops = {
@@ -3743,15 +3735,9 @@ static struct snd_soc_card *msm_int_populate_sndcard_dailinks(
 		} else */
 		if (HARDWARE_PLATFORM_GRUS == hw_platform) {
 			dev_info(dev, "%s: hardware is HARDWARE_PLATFORM_GRUS.\n", __func__);
-#ifdef CONFIG_SND_SOC_CS35L41_FOR_GRUS
 			msm_mi2s_be_dai_links[0].codec_name = CS35L41_CODEC_NAME;
 			msm_mi2s_be_dai_links[0].codec_dai_name = "cs35l41-pcm";
-#endif
-		} else {
-			dev_info(dev, "%s: hardware is unknown, %d.\n", __func__, hw_platform);
-			msm_mi2s_be_dai_links[0].codec_name = "tas2557.2-004c";
-			msm_mi2s_be_dai_links[0].codec_dai_name = "tas2557 ASI1";
-		}
+		} 
 
 		memcpy(dailink + len1,
 		       msm_mi2s_be_dai_links,
