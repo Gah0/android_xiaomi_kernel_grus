@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm64 4.9.202 Kernel Configuration
+# Linux/arm64 4.9.206 Kernel Configuration
 #
 CONFIG_ARM64=y
 CONFIG_64BIT=y
@@ -1259,6 +1259,15 @@ CONFIG_CMA_ALIGNMENT=8
 # CONFIG_ARM_CCN is not set
 # CONFIG_QCOM_EBI2 is not set
 # CONFIG_VEXPRESS_CONFIG is not set
+# CONFIG_MHI_BUS is not set
+
+#
+# MHI controllers
+#
+
+#
+# MHI device support
+#
 # CONFIG_CONNECTOR is not set
 # CONFIG_MTD is not set
 CONFIG_DTC=y
@@ -1574,6 +1583,7 @@ CONFIG_NET_VENDOR_ALTEON=y
 # CONFIG_ACENIC is not set
 # CONFIG_ALTERA_TSE is not set
 CONFIG_NET_VENDOR_AMAZON=y
+# CONFIG_ENA_ETHERNET is not set
 CONFIG_NET_VENDOR_AMD=y
 # CONFIG_AMD8111_ETH is not set
 # CONFIG_PCNET32 is not set
@@ -3053,6 +3063,7 @@ CONFIG_DRM_MIPI_DSI=y
 CONFIG_DRM_KMS_HELPER=y
 # CONFIG_DRM_FBDEV_EMULATION is not set
 # CONFIG_DRM_LOAD_EDID_FIRMWARE is not set
+# CONFIG_DRM_DP_CEC is not set
 
 #
 # I2C encoder or helper chips
@@ -3522,6 +3533,7 @@ CONFIG_HID_PLANTRONICS=y
 CONFIG_HID_SONY=y
 # CONFIG_SONY_FF is not set
 # CONFIG_HID_SPEEDLINK is not set
+# CONFIG_HID_STEAM is not set
 # CONFIG_HID_STEELSERIES is not set
 # CONFIG_HID_SUNPLUS is not set
 # CONFIG_HID_RMI is not set
