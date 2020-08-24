@@ -3976,7 +3976,6 @@ static QDF_STATUS ol_txrx_clear_peer(struct cdp_pdev *ppdev, uint8_t sta_id)
 void peer_unmap_timer_handler(void *data)
 {
 	struct ol_txrx_peer_t *peer;
-	ol_txrx_peer_handle peer = (ol_txrx_peer_handle)data;
 
 	ol_txrx_err("all unmap events not received for peer %pK, ref_cnt %d",
 		    peer, qdf_atomic_read(&peer->ref_cnt));
