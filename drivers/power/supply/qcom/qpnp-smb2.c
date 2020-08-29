@@ -460,6 +460,9 @@ static int smb2_parse_dt(struct smb2 *chip)
 	chg->ufp_only_mode = of_property_read_bool(node,
 					"qcom,ufp-only-mode");
 
+	chg->ufp_only_mode = of_property_read_bool(node,
+					"qcom,ufp-only-mode");
+
 	return 0;
 }
 
