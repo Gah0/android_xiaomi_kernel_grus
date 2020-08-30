@@ -235,6 +235,30 @@ static struct sde_csc_cfg sde_csc_10bit_convert[SDE_MAX_CSC] = {
 		{ 0x0, 0x3ff, 0x0, 0x3ff, 0x0, 0x3ff,},
 		{ 0x0, 0x3ff, 0x0, 0x3ff, 0x0, 0x3ff,},
 	},
+
+	[SDE_CSC_RGB2RGB_L] = {
+		{
+			TO_S15D16(0x01b7), TO_S15D16(0x0000), TO_S15D16(0x0000),
+			TO_S15D16(0x0000), TO_S15D16(0x01b7), TO_S15D16(0x0000),
+			TO_S15D16(0x0000), TO_S15D16(0x0000), TO_S15D16(0x01b7),
+		},
+		{ 0x0, 0x0, 0x0,},
+		{ 0x0040, 0x0040, 0x0040,},
+		{ 0x0, 0x3ff, 0x0, 0x3ff, 0x0, 0x3ff,},
+		{ 0x40, 0x3ac, 0x40, 0x3ac, 0x40, 0x3ac,},
+	},
+
+	[SDE_CSC_RGB2RGB_FR] = {
+		{
+			TO_S15D16(0x0200), TO_S15D16(0x0000), TO_S15D16(0x0000),
+			TO_S15D16(0x0000), TO_S15D16(0x0200), TO_S15D16(0x0000),
+			TO_S15D16(0x0000), TO_S15D16(0x0000), TO_S15D16(0x0200),
+		},
+		{ 0x0, 0x0, 0x0,},
+		{ 0x0, 0x0, 0x0,},
+		{ 0x0, 0x3ff, 0x0, 0x3ff, 0x0, 0x3ff,},
+		{ 0x0, 0x3ff, 0x0, 0x3ff, 0x0, 0x3ff,},
+	}
 };
 
 /**
@@ -4202,8 +4226,10 @@ int sde_encoder_prepare_for_kickoff(struct drm_encoder *drm_enc,
 			phys = sde_enc->phys_encs[i];
 			if (phys) {
 				mode = &phys->cached_mode;
-				mode_is_yuv = (mode->private_flags &
-					MSM_MODE_FLAG_COLOR_FORMAT_YCBCR420);
+				mode_is_yuv = ((mode->private_flags &
+					MSM_MODE_FLAG_COLOR_FORMAT_YCBCR420) ||
+					(mode->private_flags &
+					 MSM_MODE_FLAG_COLOR_FORMAT_YCBCR422));
 			}
 			/**
 			 * Check the CSC matrix type to which the
@@ -5285,7 +5311,8 @@ void sde_encoder_phys_setup_cdm(struct sde_encoder_phys *phys_enc,
 	}
 	sde_enc = to_sde_encoder_virt(encoder);
 
-	if (!SDE_FORMAT_IS_YUV(format)) {
+	if ((output_type == CDM_CDWN_OUTPUT_WB) &&
+			!SDE_FORMAT_IS_YUV(format)) {
 		SDE_DEBUG_ENC(sde_enc, "[cdm_disable fmt:%x]\n",
 				format->base.pixel_format);
 
@@ -5345,13 +5372,21 @@ void sde_encoder_phys_setup_cdm(struct sde_encoder_phys *phys_enc,
 	 */
 
 	if (output_type == CDM_CDWN_OUTPUT_HDMI) {
-		if (connector && connector->yuv_qs)
-			csc_type = SDE_CSC_RGB2YUV_709FR;
-		else if (connector &&
-			sde_connector_mode_needs_full_range(connector))
-			csc_type = SDE_CSC_RGB2YUV_709FR;
-		else
-			csc_type = SDE_CSC_RGB2YUV_709L;
+		if (SDE_FORMAT_IS_YUV(format)) {
+			if (connector && connector->yuv_qs)
+				csc_type = SDE_CSC_RGB2YUV_709FR;
+			else if (connector &&
+				sde_connector_mode_needs_full_range(connector))
+				csc_type = SDE_CSC_RGB2YUV_709FR;
+			else
+				csc_type = SDE_CSC_RGB2YUV_709L;
+		} else if (connector &&
+			sde_connector_mode_is_cea_mode(connector)) {
+			csc_type = SDE_CSC_RGB2RGB_L;
+		} else {
+			csc_type = SDE_CSC_RGB2RGB_FR;
+		}
+
 	} else if (output_type == CDM_CDWN_OUTPUT_WB) {
 		csc_type = SDE_CSC_RGB2YUV_601L;
 	}
@@ -5383,4 +5418,22 @@ void sde_encoder_phys_setup_cdm(struct sde_encoder_phys *phys_enc,
 			return;
 		}
 	}
+}
+
+void sde_encoder_phys_destroy_cdm(struct sde_encoder_phys *phys_enc)
+{
+	struct drm_encoder *encoder = phys_enc->parent;
+	struct sde_encoder_virt *sde_enc = NULL;
+	struct sde_hw_cdm *hw_cdm = phys_enc->hw_cdm;
+
+	if (!encoder) {
+		SDE_ERROR("invalid encoder\n");
+		return;
+	}
+	sde_enc = to_sde_encoder_virt(encoder);
+
+	SDE_DEBUG_ENC(sde_enc, "[cdm_disable]\n");
+
+	if (hw_cdm && hw_cdm->ops.disable)
+		hw_cdm->ops.disable(hw_cdm);
 }
