@@ -462,7 +462,7 @@
 					compatible = "android,system";
 					dev = "/dev/block/platform/soc/7c4000.sdhci/by-name/system";
 					type = "ext4";
-					mnt_flags = "ro,barrier=1,discard";
+					mnt_flags = "ro,barrier=0,discard,noatime,nodiratime";
 					fsmgr_flags = "wait";
 					status = "ok";
 				};
@@ -470,7 +470,7 @@
 					compatible = "android,vendor";
 					dev = "/dev/block/platform/soc/1d84000.ufshc/by-name/vendor";
 					type = "ext4";
-					mnt_flags = "ro,barrier=1,discard";
+					mnt_flags = "ro,barrier=0,discard,noatime,nodiratime";
 					fsmgr_flags = "wait";
 					status = "ok";
 				};
