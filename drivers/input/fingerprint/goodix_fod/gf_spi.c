@@ -683,56 +683,46 @@ static const struct file_operations gf_fops = {
 };
 
 #ifndef GOODIX_DRM_INTERFACE_WA
+static void fb_state_callback_worker(struct work_struct *work)
+{
+	struct gf_dev *gf_dev = container_of(work, typeof(*gf_dev), fb_work);
+	char temp[4] = { 0x0 };
+
+	if (gf_dev->device_available != 1)
+		return;
+
+#if defined(GF_NETLINK_ENABLE)
+		char temp[0] = gf_dev->fb_black ?
+			GF_NET_EVENT_FB_BLACK : GF_NET_EVENT_FB_UNBLACK;
+
+		sendnlmsg(&temp);
+#elif defined(GF_FASYNC)
+	if (gf_dev->async)
+		kill_fasync(&gf_dev->async, SIGIO, POLL_IN);
+#endif
+}
+
 static int goodix_fb_state_chg_callback(struct notifier_block *nb,
 					unsigned long val, void *data)
 {
-	struct gf_dev *gf_dev;
+	struct gf_dev *gf_dev = container_of(nb, typeof(*gf_dev), notifier);
 	struct fb_event *evdata = data;
 	unsigned int blank;
-	char temp[4] = { 0x0 };
 
 	if (val != DRM_EVENT_BLANK)
 		return 0;
-	pr_debug
-	    ("[info] %s go to the goodix_fb_state_chg_callback value = %d\n",
-	     __func__, (int)val);
-	gf_dev = container_of(nb, struct gf_dev, notifier);
-	if (evdata && evdata->data && val == DRM_EVENT_BLANK && gf_dev) {
-		blank = *(int *)(evdata->data);
-		switch (blank) {
-		case DRM_BLANK_POWERDOWN:
-			if (gf_dev->device_available == 1) {
-				gf_dev->fb_black = 1;
-				gf_dev->wait_finger_down = true;
-#if defined(GF_NETLINK_ENABLE)
-				temp[0] = GF_NET_EVENT_FB_BLACK;
-				sendnlmsg(temp);
-#elif defined (GF_FASYNC)
-				if (gf_dev->async) {
-					kill_fasync(&gf_dev->async, SIGIO,
-						    POLL_IN);
-				}
-#endif
-			}
-			break;
-		case DRM_BLANK_UNBLANK:
-			if (gf_dev->device_available == 1) {
-				gf_dev->fb_black = 0;
-#if defined(GF_NETLINK_ENABLE)
-				temp[0] = GF_NET_EVENT_FB_UNBLACK;
-				sendnlmsg(temp);
-#elif defined (GF_FASYNC)
-				if (gf_dev->async) {
-					kill_fasync(&gf_dev->async, SIGIO,
-						    POLL_IN);
-				}
-#endif
-			}
-			break;
-		default:
-			pr_debug("%s defalut\n", __func__);
-			break;
-		}
+
+	blank = *(int *)(evdata->data);
+	switch (blank) {
+	case DRM_BLANK_POWERDOWN:
+		gf_dev->fb_black = 1;
+		gf_dev->wait_finger_down = true;
+		schedule_work(&gf_dev->fb_work);
+		break;
+	case DRM_BLANK_UNBLANK:
+		gf_dev->fb_black = 0;
+		schedule_work(&gf_dev->fb_work);
+		break;
 	}
 	return NOTIFY_OK;
 }
@@ -835,6 +825,7 @@ static int gf_probe(struct platform_device *pdev)
 #endif
 
 #ifndef GOODIX_DRM_INTERFACE_WA
+	INIT_WORK(&gf_dev->fb_work, fb_state_callback_worker);
 	gf_dev->notifier = goodix_noti_block;
 	drm_register_client(&gf_dev->notifier);
 #endif
