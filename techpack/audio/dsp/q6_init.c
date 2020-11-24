@@ -30,7 +30,9 @@ static int __init audio_q6_init(void)
 	msm_audio_ion_init();
 	audio_slimslave_init();
 	avtimer_init();
+#ifdef CONFIG_ELLIPTIC_ULTRASOUND
 	elliptic_driver_init();
+#endif
 #ifdef CONFIG_MSM_CSPL
 	crus_sp_init();
 #endif
@@ -54,7 +56,9 @@ static void __exit audio_q6_exit(void)
 	rtac_exit();
 	audio_cal_exit();
 	adsp_err_exit();
+#ifdef CONFIG_ELLIPTIC_ULTRASOUND
 	elliptic_driver_exit();
+#endif
 }
 
 module_init(audio_q6_init);
