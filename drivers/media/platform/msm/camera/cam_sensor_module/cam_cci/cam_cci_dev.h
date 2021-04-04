@@ -1,4 +1,5 @@
 /* Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2020 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -207,6 +208,7 @@ struct cci_device {
 	struct cam_hw_soc_info soc_info;
 	uint32_t hw_version;
 	uint8_t ref_count;
+	uint8_t ref_count_cci[MASTER_MAX];
 	enum cam_cci_state_t cci_state;
 	struct cam_cci_i2c_queue_info
 		cci_i2c_queue_info[NUM_MASTERS][NUM_QUEUES];

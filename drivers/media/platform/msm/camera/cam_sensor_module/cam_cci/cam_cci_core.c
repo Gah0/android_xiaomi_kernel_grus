@@ -1,4 +1,5 @@
 /* Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2020 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -561,6 +562,7 @@ void cam_cci_get_clk_rates(struct cci_device *cci_dev,
 	}
 }
 
+extern uint32_t g_operation_mode;
 static int32_t cam_cci_set_clk_param(struct cci_device *cci_dev,
 	struct cam_cci_ctrl *c_ctrl)
 {
@@ -1518,14 +1520,14 @@ static int32_t cam_cci_i2c_set_sync_prms(struct v4l2_subdev *sd,
 	return rc;
 }
 
-static int32_t cam_cci_release(struct v4l2_subdev *sd)
+static int32_t cam_cci_release(struct v4l2_subdev *sd, struct cam_cci_ctrl *c_ctrl)
 {
 	uint8_t rc = 0;
 	struct cci_device *cci_dev;
 
 	cci_dev = v4l2_get_subdevdata(sd);
 
-	rc = cam_cci_soc_release(cci_dev);
+	rc = cam_cci_soc_release(cci_dev, c_ctrl);
 	if (rc < 0) {
 		CAM_ERR(CAM_CCI, "Failed in releasing the cci: %d", rc);
 		return rc;
@@ -1541,7 +1543,7 @@ static int32_t cam_cci_write(struct v4l2_subdev *sd,
 	struct cci_device *cci_dev;
 	enum cci_i2c_master_t master;
 	struct cam_cci_master_info *cci_master_info;
-	uint32_t i;
+	/*uint32_t i;*/
 
 	cci_dev = v4l2_get_subdevdata(sd);
 	if (!cci_dev || !c_ctrl) {
@@ -1575,14 +1577,14 @@ static int32_t cam_cci_write(struct v4l2_subdev *sd,
 	case MSM_CCI_I2C_WRITE:
 	case MSM_CCI_I2C_WRITE_SEQ:
 	case MSM_CCI_I2C_WRITE_BURST:
-		for (i = 0; i < NUM_QUEUES; i++) {
+		/* for (i = 0; i < NUM_QUEUES; i++) {
 			if (mutex_trylock(&cci_master_info->mutex_q[i])) {
 				rc = cam_cci_i2c_write(sd, c_ctrl, i,
 					MSM_SYNC_DISABLE);
 				mutex_unlock(&cci_master_info->mutex_q[i]);
 				return rc;
 			}
-		}
+		} */
 		mutex_lock(&cci_master_info->mutex_q[PRIORITY_QUEUE]);
 		rc = cam_cci_i2c_write(sd, c_ctrl,
 			PRIORITY_QUEUE, MSM_SYNC_DISABLE);
@@ -1622,7 +1624,7 @@ int32_t cam_cci_core_cfg(struct v4l2_subdev *sd,
 		break;
 	case MSM_CCI_RELEASE:
 		mutex_lock(&cci_dev->init_mutex);
-		rc = cam_cci_release(sd);
+		rc = cam_cci_release(sd, cci_ctrl);
 		mutex_unlock(&cci_dev->init_mutex);
 		break;
 	case MSM_CCI_I2C_READ:
