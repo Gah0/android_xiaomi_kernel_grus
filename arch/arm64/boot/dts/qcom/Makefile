@@ -113,11 +113,9 @@ endif
 
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 	dtbo-$(CONFIG_ARCH_SDM670) += \
-		grus-sdm710-overlay.dtbo \
 		grus-sdm712-overlay.dtbo
 
-grus-sdm710-overlay.dtbo-base := sdm710.dtb
-grus-sdm712-overlay.dtbo-base := sdm710.dtb
+grus-sdm712-overlay.dtbo-base := grus.dtb
 
 else
 dtb-$(CONFIG_ARCH_SDM670) += \
