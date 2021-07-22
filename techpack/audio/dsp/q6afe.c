@@ -400,7 +400,7 @@ static int32_t afe_callback(struct apr_client_data *data, void *priv)
 			wake_up(&this_afe.wait[data->token]);
 		else
 			return -EINVAL;
-#ifdef CONFIG_ELLIPTIC_ULTRASOUND
+#if defined (CONFIG_ELLIPTIC_ULTRASOUND)
 	} else if (data->opcode == ULTRASOUND_OPCODE) {
 		if (data->payload != NULL)
 			elliptic_process_apr_payload(data->payload);
@@ -1175,7 +1175,7 @@ fail_cmd:
 	return ret;
 }
 
-#ifdef CONFIG_ELLIPTIC_ULTRASOUND
+#if defined (CONFIG_ELLIPTIC_ULTRASOUND)
 afe_ultrasound_state_t elus_afe = {
 	.ptr_apr= &this_afe.apr,
 	.ptr_status= &this_afe.status,

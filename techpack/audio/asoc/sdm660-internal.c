@@ -1696,7 +1696,7 @@ static int msm_snd_card_late_probe(struct snd_soc_card *card)
 	struct snd_soc_codec *ana_cdc;
 	struct snd_soc_pcm_runtime *rtd;
 	int ret = 0;
-#if defined(CONFIG_MACH_XIAOMI_F2) && defined(CONFIG_SND_SOC_CS35L41)
+#if defined(CONFIG_SND_SOC_CS35L41)
 	struct snd_soc_dai_link *dai_link;
 	struct snd_soc_codec *cs35l41_codec;
 	struct snd_soc_dapm_context * cs35l41_dapm;
@@ -1722,7 +1722,7 @@ static int msm_snd_card_late_probe(struct snd_soc_card *card)
 		kfree(mbhc_cfg_ptr->calibration);
 	}
 
-#if defined(CONFIG_MACH_XIAOMI_F2) && defined(CONFIG_SND_SOC_CS35L41)
+#if defined(CONFIG_SND_SOC_CS35L41)
 	dai_link = rtd->dai_link;
 	if (dai_link && dai_link->codec_name) {
 		if (!strcmp(dai_link->codec_name, CS35L41_CODEC_NAME)) {
@@ -3473,7 +3473,7 @@ static struct snd_soc_card *msm_int_populate_sndcard_dailinks(
 
 	if (of_property_read_bool(dev->of_node,
 				  "qcom,mi2s-audio-intf")) {
-#if defined(CONFIG_MACH_XIAOMI_F2) && defined(CONFIG_SND_SOC_CS35L41)
+#if defined(CONFIG_SND_SOC_CS35L41)
 		msm_mi2s_be_dai_links[0].codec_name = CS35L41_CODEC_NAME;
 		msm_mi2s_be_dai_links[0].codec_dai_name = "cs35l41-pcm";
 #endif
